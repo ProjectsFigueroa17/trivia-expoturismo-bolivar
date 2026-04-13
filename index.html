@@ -26,19 +26,21 @@
             margin: 0;
             padding: 15px;
             box-sizing: border-box;
+            overflow-x: hidden;
         }
 
+        
         .cintillo-universidad {
             width: 100%;
             max-width: 600px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
         .cintillo-universidad img {
-            max-width: 70%;
+            max-width: 100%;
             height: auto;
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));
         }
 
         #quiz-container {
@@ -50,7 +52,30 @@
             width: 100%;
             text-align: center;
             box-sizing: border-box;
+            position: relative; 
         }
+
+        
+        #feedback-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 10;
+            padding: 20px 40px;
+            border-radius: 50px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            white-space: nowrap;
+        }
+
+        #feedback-overlay.show { transform: translate(-50%, -50%) scale(1); }
+        .bg-exito { background-color: var(--exito); box-shadow: 0 0 20px var(--exito); }
+        .bg-error { background-color: var(--error); box-shadow: 0 0 20px var(--error); }
 
         .contenedor-imagen {
             width: 100%;
@@ -62,72 +87,33 @@
             border: 3px solid var(--primario);
         }
 
-        .img-trivia {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .img-trivia { width: 100%; height: 100%; object-fit: cover; }
 
         h1 { color: var(--primario); font-size: 1.6rem; margin-top: 0; }
         
         .opcion {
-            display: block; 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0;
-            border: 2px solid #ddd; 
-            border-radius: 10px;
-            background: white; 
-            cursor: pointer; 
-            font-size: 1rem;
-            transition: all 0.2s ease; 
-            text-align: left; 
-            font-weight: 500;
+            display: block; width: 100%; padding: 14px; margin: 10px 0;
+            border: 2px solid #ddd; border-radius: 10px;
+            background: white; cursor: pointer; font-size: 1rem;
+            transition: all 0.2s ease; text-align: left; font-weight: 500;
             box-sizing: border-box;
         }
 
-        /* Feedback Visual */
-        .correcto {
-            background-color: var(--exito) !important;
-            color: white !important;
-            border-color: #27ae60 !important;
-        }
-
-        .incorrecto {
-            background-color: var(--error) !important;
-            color: white !important;
-            border-color: #c0392b !important;
-        }
+        .correcto { background-color: var(--exito) !important; color: white !important; border-color: #27ae60 !important; }
+        .incorrecto { background-color: var(--error) !important; color: white !important; border-color: #c0392b !important; }
 
         .btn-accion {
-            padding: 12px 25px; 
-            background-color: var(--acento);
-            color: white; 
-            border: none; 
-            border-radius: 30px;
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            cursor: pointer;
-            transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            margin: 5px;
+            padding: 12px 25px; background-color: var(--acento);
+            color: white; border: none; border-radius: 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 5px;
         }
 
-        .btn-reset { 
-            background-color: #666 !important; 
-            font-size: 0.8rem !important; 
-            padding: 8px 15px !important; 
-            margin-top: 15px;
-            opacity: 0.8;
-        }
+        .btn-reset { background-color: #666 !important; font-size: 0.8rem !important; padding: 8px 15px !important; margin-top: 15px; }
 
         input[type="text"] {
-            padding: 12px; 
-            width: 90%; 
-            border-radius: 10px;
-            border: 2px solid var(--primario); 
-            margin-bottom: 20px; 
-            font-size: 1rem;
+            padding: 12px; width: 90%; border-radius: 10px;
+            border: 2px solid var(--primario); margin-bottom: 20px; font-size: 1rem;
             box-sizing: border-box;
         }
 
@@ -138,12 +124,6 @@
         .oculto { display: none; }
         .progreso { color: #e20093; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
         .bloqueado { pointer-events: none; }
-
-        @media (max-width: 400px) {
-            h1 { font-size: 1.3rem; }
-            .contenedor-imagen { height: 180px; }
-            .opcion { padding: 10px; font-size: 0.9rem; }
-        }
     </style>
 </head>
 <body>
@@ -153,7 +133,8 @@
 </div>
 
 <div id="quiz-container">
-    
+    <div id="feedback-overlay"></div>
+
     <div id="pantalla-inicio">
         <h1>🏔️ Trivia Bolívar</h1>
         <div class="contenedor-imagen">
@@ -175,7 +156,6 @@
     <div id="pantalla-final" class="oculto">
         <h2>¡Recorrido Completado! 🏁</h2>
         <p id="resultado-final" style="font-size: 1.8rem; font-weight: bold; color: var(--primario);"></p>
-        
         <h3>🏆 Top 4 Ranking</h3>
         <table class="tabla-ranking">
             <thead><tr><th>Pos</th><th>Nombre</th><th>Pts</th></tr></thead>
@@ -186,10 +166,10 @@
         <br>
         <button class="btn-accion btn-reset" onclick="borrarRanking()">Borrar Historial</button>
     </div>
-
 </div>
 
 <script>
+    
     const preguntas = [
         { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: 1, img: "angel.jpg" },
         { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: 2, img: "cachamay.jpg" },
@@ -246,18 +226,24 @@
 
     function verificarRespuesta(seleccionado, correcto, boton) {
         const lista = document.getElementById("opciones-lista");
+        const overlay = document.getElementById("feedback-overlay");
         lista.classList.add("bloqueado");
 
         if (seleccionado === correcto) {
             boton.classList.add("correcto");
             puntaje++;
+            overlay.innerText = "¡EXCELENTE! 🌟";
+            overlay.className = "bg-exito show";
         } else {
             boton.classList.add("incorrecto");
             const botones = lista.getElementsByTagName("button");
             botones[correcto].classList.add("correcto");
+            overlay.innerText = "ERROR ❌";
+            overlay.className = "bg-error show";
         }
 
         setTimeout(() => {
+            overlay.className = ""; 
             indiceActual++;
             if (indiceActual < preguntas.length) {
                 cargarPregunta();
@@ -276,7 +262,7 @@
         let historial = JSON.parse(localStorage.getItem("rankingIutirla") || "[]");
         historial.push({ nombre: usuarioActual, pts: puntosFinales });
         historial.sort((a, b) => b.pts - a.pts);
-        historial = historial.slice(0, 5); 
+        historial = historial.slice(0, 100); 
         localStorage.setItem("rankingIutirla", JSON.stringify(historial));
 
         const tabla = document.getElementById("lista-ranking");
@@ -284,10 +270,9 @@
     }
 
     function borrarRanking() {
-        if(confirm("¿Seguro que quieres borrar todo el historial de puntajes?")) {
+        if(confirm("¿Seguro que quieres borrar el historial?")) {
             localStorage.removeItem("rankingIutirla");
             document.getElementById("lista-ranking").innerHTML = "";
-            alert("Historial borrado correctamente.");
         }
     }
 </script>
