@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trivia IUTIRLA: Tesoros de Bolívar</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --primario: #005f73;
@@ -28,19 +32,21 @@
             box-sizing: border-box;
         }
 
+        
         .cintillo-universidad {
             width: 100%;
-            max-width: 600px;
-            margin-bottom: 15px;
+            max-width: 650px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
         .cintillo-universidad img {
-            max-width: 70%;
+            max-width: 100%;
             height: auto;
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));
         }
 
+        
         #quiz-container {
             background: white;
             padding: 1.5rem;
@@ -62,104 +68,66 @@
             border: 3px solid var(--primario);
         }
 
-        .img-trivia {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .img-trivia { width: 100%; height: 100%; object-fit: cover; }
 
-        h1 { color: var(--primario); font-size: 1.6rem; margin-top: 0; }
+        h1 { color: var(--primario); font-size: 1.6rem; margin: 0 0 15px 0; }
         
+    
         .opcion {
-            display: block; 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0;
-            border: 2px solid #ddd; 
-            border-radius: 10px;
-            background: white; 
-            cursor: pointer; 
-            font-size: 1rem;
-            transition: all 0.2s ease; 
-            text-align: left; 
-            font-weight: 500;
+            display: block; width: 100%; padding: 14px; margin: 10px 0;
+            border: 2px solid #ddd; border-radius: 10px;
+            background: white; cursor: pointer; font-size: 1rem;
+            transition: all 0.2s ease; text-align: left; font-weight: 500;
             box-sizing: border-box;
         }
 
-        /* Feedback Visual */
-        .correcto {
-            background-color: var(--exito) !important;
-            color: white !important;
-            border-color: #27ae60 !important;
-        }
-
-        .incorrecto {
-            background-color: var(--error) !important;
-            color: white !important;
-            border-color: #c0392b !important;
-        }
+        .correcto { background-color: var(--exito) !important; color: white !important; border-color: #27ae60 !important; }
+        .incorrecto { background-color: var(--error) !important; color: white !important; border-color: #c0392b !important; }
 
         .btn-accion {
-            padding: 12px 25px; 
-            background-color: var(--acento);
-            color: white; 
-            border: none; 
-            border-radius: 30px;
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            cursor: pointer;
-            transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            margin: 5px;
-        }
-
-        .btn-reset { 
-            background-color: #666 !important; 
-            font-size: 0.8rem !important; 
-            padding: 8px 15px !important; 
-            margin-top: 15px;
-            opacity: 0.8;
+            padding: 12px 25px; background-color: var(--acento);
+            color: white; border: none; border-radius: 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 5px;
         }
 
         input[type="text"] {
-            padding: 12px; 
-            width: 90%; 
-            border-radius: 10px;
-            border: 2px solid var(--primario); 
-            margin-bottom: 20px; 
-            font-size: 1rem;
+            padding: 12px; width: 90%; border-radius: 10px;
+            border: 2px solid var(--primario); margin-bottom: 20px; font-size: 1rem;
             box-sizing: border-box;
         }
 
-        .tabla-ranking { width: 100%; margin-top: 15px; border-collapse: collapse; }
+        
+        .tabla-contenedor {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .tabla-ranking { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         .tabla-ranking th, .tabla-ranking td { padding: 10px; border-bottom: 1px solid #ddd; }
-        .tabla-ranking th { background: var(--primario); color: white; }
+        .tabla-ranking th { background: var(--primario); color: white; position: sticky; top: 0; }
 
         .oculto { display: none; }
         .progreso { color: #e20093; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
         .bloqueado { pointer-events: none; }
-
-        @media (max-width: 400px) {
-            h1 { font-size: 1.3rem; }
-            .contenedor-imagen { height: 180px; }
-            .opcion { padding: 10px; font-size: 0.9rem; }
-        }
     </style>
 </head>
 <body>
 
 <div class="cintillo-universidad">
-    <img src="iutirla.jpg" alt="Logo Universidad" onerror="this.style.display='none'">
+    <img src="iutirla.jpg" alt="Logo Universidad IUTIRLA" onerror="this.style.display='none'">
 </div>
 
 <div id="quiz-container">
-    
     <div id="pantalla-inicio">
         <h1>🏔️ Trivia Bolívar</h1>
         <div class="contenedor-imagen">
             <img src="portada.jpg" class="img-trivia" onerror="this.src='https://via.placeholder.com/400x220?text=Tesoros+de+Bolivar'">
         </div>
-        <p>Ingresa tu nombre para comenzar:</p>
+        <p>Ingresa tu nombre para competir:</p>
         <input type="text" id="nombre-usuario" placeholder="Nombre y Apellido">
         <br>
         <button class="btn-accion" onclick="empezarJuego()">¡Comenzar!</button>
@@ -173,23 +141,37 @@
     </div>
 
     <div id="pantalla-final" class="oculto">
-        <h2>¡Recorrido Completado! 🏁</h2>
+        <h2>¡Recorrido Finalizado! 🏁</h2>
         <p id="resultado-final" style="font-size: 1.8rem; font-weight: bold; color: var(--primario);"></p>
-        
-        <h3>🏆 Top 4 Ranking</h3>
-        <table class="tabla-ranking">
-            <thead><tr><th>Pos</th><th>Nombre</th><th>Pts</th></tr></thead>
-            <tbody id="lista-ranking"></tbody>
-        </table>
+        <h3>🏆 Ranking Global (Top 100)</h3>
+        <div class="tabla-contenedor">
+            <table class="tabla-ranking">
+                <thead><tr><th>Pos</th><th>Nombre</th><th>Pts</th></tr></thead>
+                <tbody id="lista-ranking"></tbody>
+            </table>
+        </div>
         <br>
         <button class="btn-accion" onclick="location.reload()">Jugar de nuevo</button>
-        <br>
-        <button class="btn-accion btn-reset" onclick="borrarRanking()">Borrar Historial</button>
     </div>
-
 </div>
 
 <script>
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCyRgck7A2wAoWEd8WrkI1HUOv4rjubSWo",
+        authDomain: "trivia-bolivar.firebaseapp.com",
+        projectId: "trivia-bolivar",
+        storageBucket: "trivia-bolivar.firebasestorage.app",
+        messagingSenderId: "1046239380884",
+        appId: "1:1046239380884:web:596a91edb4f22358957b81",
+        measurementId: "G-BLZDKKT4WR"
+    };
+    
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    
     const preguntas = [
         { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: 1, img: "angel.jpg" },
         { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: 2, img: "cachamay.jpg" },
@@ -264,31 +246,42 @@
             } else {
                 mostrarResultado();
             }
-        }, 1200);
+        }, 800);
     }
 
     function mostrarResultado() {
         document.getElementById("juego").classList.add("oculto");
         document.getElementById("pantalla-final").classList.remove("oculto");
         const puntosFinales = puntaje * 100;
-        document.getElementById("resultado-final").innerText = puntosFinales + " Puntos";
+        document.getElementById("resultado-final").innerText = puntosFinales + " Pts";
 
-        let historial = JSON.parse(localStorage.getItem("rankingIutirla") || "[]");
-        historial.push({ nombre: usuarioActual, pts: puntosFinales });
-        historial.sort((a, b) => b.pts - a.pts);
-        historial = historial.slice(0, 100); 
-        localStorage.setItem("rankingIutirla", JSON.stringify(historial));
+        
+        database.ref('ranking').push({
+            nombre: usuarioActual,
+            pts: puntosFinales,
+            fecha: Date.now()
+        });
 
-        const tabla = document.getElementById("lista-ranking");
-        tabla.innerHTML = historial.map((r, i) => `<tr><td>${i+1}</td><td>${r.nombre}</td><td>${r.pts}</td></tr>`).join("");
+        actualizarRankingVisual();
     }
 
-    function borrarRanking() {
-        if(confirm("¿Seguro que quieres borrar todo el historial de puntajes?")) {
-            localStorage.removeItem("rankingIutirla");
-            document.getElementById("lista-ranking").innerHTML = "";
-            alert("Historial borrado correctamente.");
-        }
+    function actualizarRankingVisual() {
+        
+        database.ref('ranking').orderByChild('pts').limitToLast(100).on('value', (snapshot) => {
+            let datos = [];
+            snapshot.forEach((child) => {
+                datos.push(child.val());
+            });
+            datos.reverse(); 
+
+            const tabla = document.getElementById("lista-ranking");
+            tabla.innerHTML = datos.map((r, i) => `
+                <tr>
+                    <td>${i+1}</td>
+                    <td>${r.nombre}</td>
+                    <td>${r.pts}</td>
+                </tr>`).join("");
+        });
     }
 </script>
 </body>
