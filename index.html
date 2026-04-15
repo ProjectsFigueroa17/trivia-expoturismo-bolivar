@@ -56,6 +56,7 @@
             justify-content: center;
         }
 
+        
         @media (max-width: 400px) {
             .contenedor-imagen { height: 140px; }
             h1 { font-size: 1.3rem !important; }
@@ -79,20 +80,12 @@
         .correcto { background-color: var(--exito) !important; color: white; border-color: #27ae60; }
         .incorrecto { background-color: var(--error) !important; color: white; border-color: #c0392b; }
 
-        
-        .seccion-final-controles {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px dashed #ddd;
-        }
-
         .btn-accion {
             padding: 12px 30px; background: var(--acento);
             color: white; border: none; border-radius: 50px;
             font-size: 1.1rem; font-weight: bold; cursor: pointer;
             width: 100%; 
             max-width: 250px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         input {
@@ -102,7 +95,7 @@
         }
 
         .tabla-contenedor {
-            max-height: 180px; overflow-y: auto; margin-top: 10px;
+            max-height: 200px; overflow-y: auto; margin-top: 10px;
             border-radius: 8px; border: 1px solid #eee;
         }
 
@@ -139,28 +132,16 @@
     </div>
 
     <div id="pantalla-final" class="oculto">
-        <h3 style="margin:0">🏆 Ranking Global (Top 4) </h3>
-        <p id="resultado-final" style="font-size: 1.8rem; color: var(--primario); font-weight: bold; margin: 10px 0;"></p>
-        
-        <h4 style="margin:10px 0 5px 0; font-size: 0.9rem; color: #666;">📊 Ranking Global</h4>
+        <h3>🏆 Ranking Global (Top 4)</h3>
+        <p id="resultado-final" style="font-size: 1.5rem; color: var(--primario); font-weight: bold; margin: 5px 0;"></p>
         <div class="tabla-contenedor">
             <table>
                 <thead><tr><th>#</th><th>Jugador</th><th>Pts</th></tr></thead>
                 <tbody id="lista-ranking"></tbody>
             </table>
         </div>
-
-        <h4 style="margin:15px 0 5px 0; font-size: 0.9rem; color: #666;">💾 Mis Intentos Local</h4>
-        <div class="tabla-contenedor">
-            <table>
-                <thead><tr><th>Fecha</th><th>Pts</th></tr></thead>
-                <tbody id="historial-local"></tbody>
-            </table>
-        </div>
-
-        <div class="seccion-final-controles">
-            <button class="btn-accion" onclick="location.reload()">🔄 Reiniciar Juego</button>
-        </div>
+        <br>
+        <button class="btn-accion" onclick="location.reload()">🔄 Reiniciar Juego</button>
     </div>
 </div>
 
@@ -238,38 +219,12 @@
         document.getElementById("pantalla-final").classList.remove("oculto");
         const total = puntaje * 100;
         document.getElementById("resultado-final").innerText = total + " Puntos";
-        
-        
         database.ref('ranking').push({ nombre, pts: total, fecha: Date.now() });
-        
-        
-        guardarLocal(total);
-        
-        
         cargarRanking();
-        mostrarHistorialLocal();
-    }
-
-    function guardarLocal(puntos) {
-        let historial = JSON.parse(localStorage.getItem('historial_bolivar')) || [];
-        historial.push({ 
-            pts: puntos, 
-            fecha: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        });
-        localStorage.setItem('historial_bolivar', JSON.stringify(historial));
-    }
-
-    function mostrarHistorialLocal() {
-        let historial = JSON.parse(localStorage.getItem('historial_bolivar')) || [];
-        const body = document.getElementById("historial-local");
-        
-        body.innerHTML = historial.reverse().slice(0, 300).map(h => `
-            <tr><td>${h.fecha}</td><td><strong>${h.pts}</strong></td></tr>
-        `).join("");
     }
 
     function cargarRanking() {
-        database.ref('ranking').orderByChild('pts').limitToLast(10).on('value', s => {
+        database.ref('ranking').orderByChild('pts').limitToLast(50).on('value', s => {
             let arr = []; s.forEach(child => { arr.push(child.val()); });
             arr.sort((a,b) => b.pts - a.pts || a.fecha - b.fecha);
             document.getElementById("lista-ranking").innerHTML = arr.map((r, i) => 
