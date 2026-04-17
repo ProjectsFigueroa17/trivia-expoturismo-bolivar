@@ -5,27 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trivia IUTIRLA: Tesoros de Bolívar</title>
     
-    
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primario: #005f73; --acento: #f1b92c; --fondo: #c3262f; --exito: #2ecc71; --error: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; }
+        :root {
+            --primario: #005f73;
+            --acento: #f1b92c;
+            --fondo: #c3262f;
+            --exito: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--fondo);
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px; 
+            box-sizing: border-box;
+        }
+
         .cintillo { width: 100%; max-width: 500px; margin-bottom: 15px; text-align: center; }
         .cintillo img { max-width: 90%; height: auto; border-radius: 8px; }
-        #quiz-container { background: white; padding: 1.2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 450px; width: 100%; text-align: center; box-sizing: border-box; }
-        .contenedor-imagen { width: 100%; height: 180px; background: #eee; border-radius: 12px; margin-bottom: 12px; overflow: hidden; border: 3px solid var(--primario); display: flex; align-items: center; justify-content: center; }
+
+        #quiz-container {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .contenedor-imagen {
+            width: 100%;
+            height: 180px; 
+            background: #eee;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 3px solid var(--primario);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        
+        @media (max-width: 400px) {
+            .contenedor-imagen { height: 140px; }
+            h1 { font-size: 1.3rem !important; }
+            h2 { font-size: 1rem !important; }
+            .opcion { padding: 10px !important; font-size: 0.9rem !important; }
+        }
+
         .img-trivia { width: 100%; height: 100%; object-fit: cover; }
-        .opcion { display: block; width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; background: #f9f9f9; cursor: pointer; font-size: 0.95rem; transition: 0.2s; text-align: left; font-weight: 600; box-sizing: border-box; }
+
+        h1 { color: var(--primario); font-size: 1.5rem; margin: 0 0 10px 0; }
+        h2 { font-size: 1.1rem; margin-bottom: 15px; line-height: 1.3; }
+        
+        .opcion {
+            display: block; width: 100%; padding: 12px; margin: 8px 0;
+            border: 2px solid #eee; border-radius: 10px;
+            background: #f9f9f9; cursor: pointer; font-size: 0.95rem;
+            transition: 0.2s; text-align: left; font-weight: 600;
+            box-sizing: border-box;
+        }
+
         .correcto { background-color: var(--exito) !important; color: white; border-color: #27ae60; }
         .incorrecto { background-color: var(--error) !important; color: white; border-color: #c0392b; }
-        .btn-accion { padding: 12px 30px; background: var(--acento); color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; max-width: 250px; }
-        input { padding: 12px; width: 100%; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; }
-        .tabla-contenedor { max-height: 200px; overflow-y: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #eee; }
+
+        .btn-accion {
+            padding: 12px 30px; background: var(--acento);
+            color: white; border: none; border-radius: 50px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            width: 100%; 
+            max-width: 250px;
+        }
+
+        input {
+            padding: 12px; width: 100%; border-radius: 10px;
+            border: 2px solid #ddd; margin-bottom: 15px; box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .tabla-contenedor {
+            max-height: 200px; overflow-y: auto; margin-top: 10px;
+            border-radius: 8px; border: 1px solid #eee;
+        }
+
         table { width: 100%; border-collapse: collapse; }
         th { background: var(--primario); color: white; padding: 8px; font-size: 0.8rem; position: sticky; top: 0; }
         td { padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+
         .oculto { display: none; }
         .bloqueado { pointer-events: none; }
     </style>
@@ -40,7 +117,7 @@
     <div id="pantalla-inicio">
         <h1>🏔️ Trivia De Bolívar</h1>
         <div class="contenedor-imagen">
-            <img src="portada.jpg" class="img-trivia" onerror="this.src='https://placeholder.com'">
+            <img src="portada.jpg" class="img-trivia" onerror="this.src='https://via.placeholder.com/400x220?text=IUTIRLA+Trivia'">
         </div>
         <p>Ingresa tu nombre para comenzar:</p>
         <input type="text" id="nombre-usuario" placeholder="Nombre y Apellido">
@@ -69,62 +146,46 @@
 </div>
 
 <script>
-    
     const firebaseConfig = {
         apiKey: "AIzaSyCyRgck7A2wAoWEd8WrkI1HUOv4rjubSWo",
-        authDomain: "://firebaseapp.com",
-        databaseURL: "https://firebaseio.com",
+        authDomain: "trivia-bolivar.firebaseapp.com",
         projectId: "trivia-bolivar",
         storageBucket: "trivia-bolivar.firebasestorage.app",
         messagingSenderId: "1046239380884",
         appId: "1:1046239380884:web:596a91edb4f22358957b81"
     };
-
+    
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    const bancoPreguntas = [
-        { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: "Salto Ángel", img: "angel.jpg" },
-        { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: "Ciudad Guayana", img: "cachamay.jpg" },
-        { q: "¿Qué tepuy es famoso por ser llamado 'El Mundo Perdido'?", options: ["Monte Roraima", "Cerro Autana", "Auyantepui"], correct: "Monte Roraima", img: "roraima.jpg" },
-        { q: "¿Qué fortificaciones coloniales protegen la entrada por el río Orinoco?", options: ["Castillo de San Carlos", "Castillos de Guayana", "Fortín Solano"], correct: "Castillos de Guayana", img: "castillos.jpg" },
-        { q: "¿Cómo se llama la unión de los ríos Orinoco y Caroní?", options: ["El Abrazo de los Ríos", "Boca de Serpiente", "Confluencia Caroní-Orinoco"], correct: "Confluencia Caroní-Orinoco", img: "confluencia.jpg" },
-        { q: "¿Cuál es el pez emblemático que tiene su feria en Ciudad Bolívar?", options: ["Curbina", "Sapoara", "Bocachico"], correct: "Sapoara", img: "sapoara.jpg" },
-        { q: "¿Qué artista cinético tiene un museo en Ciudad Bolívar?", options: ["Carlos Cruz-Diez", "Alejandro Otero", "Jesús Soto"], correct: "Jesús Soto", img: "soto.jpg" },
-        { q: "¿Cómo se llama el puente que cruza el Orinoco en Ciudad Bolívar?", options: ["Puente Angostura", "Puente Orinoquia", "Puente Rafael Urdaneta"], correct: "Puente Angostura", img: "puente.jpg" },
-        { q: "¿En qué población se celebran los carnavales Patrimonio de la Humanidad?", options: ["Guasipati", "Tumeremo", "El Callao"], correct: "El Callao", img: "callao.jpg" },
-        { q: "¿Cuál es el fruto seco típico con el que se hacen turrones?", options: ["Maní", "Merey", "Nuez de Barinas"], correct: "Merey", img: "merey.jpg" },
-        { q: "¿Qué lugar de la Gran Sabana tiene piso de piedra roja?", options: ["Quebrada del Jaspe", "Salto Aponguao", "Velo de la Novia"], correct: "Quebrada del Jaspe", img: "jaspe.jpg" },
-        { q: "¿Cómo se llama la central hidroeléctrica más grande de Venezuela?", options: ["Macagua", "Guri", "Caruachi"], correct: "Guri", img: "guri.jpg" },
-        { q: "¿Qué etnia indígena habita principalmente en Canaima?", options: ["Pemón", "Yanomami", "Warao"], correct: "Pemón", img: "pemon.jpg" },
-        { q: "¿En qué casa histórica se redactó el Discurso de Angostura?", options: ["Casa de las Doce Ventanas", "Congreso de Angostura", "Casa San Isidro"], correct: "Congreso de Angostura", img: "congreso.jpg" },
-        { q: "¿Qué dulce tradicional se prepara con yuca y papelón?", options: ["Naiboa", "Majarete", "Jalea de Mango"], correct: "Naiboa", img: "naiboa.jpg" },
-        { q: "¿En qué parque se encuentra este salto?", options: ["Parque Cachamay", "Parque La Llovizna", "Parque Loefling"], correct: "Parque La Llovizna", img: "llovizna.jpg" },
-        { q: "¿Qué CC tiene forma de pirámide en Pto. Ordaz?", options: ["Orinokia Mall", "CC Altavista", "Babilonia"], correct: "Orinokia Mall", img: "orinokia.jpg" },
-        { q: "¿Cuál es el museo interactivo junto a Central Macagua?", options: ["Museo Jesús Soto", "Ecomuseo del Caroní", "Museo de Guayana"], correct: "Ecomuseo del Caroní", img: "ecomuseo.jpg" },
-        { q: "¿En qué sector de San Félix fue la batalla?", options: ["Dalla Costa", "El Roble", "Chirica"], correct: "Chirica", img: "chirica.jpg" },
-        { q: "¿Qué parque de Pto. Ordaz es un zoológico de fauna regional?", options: ["Parque La Navidad", "Parque Loefling", "Parque La Fundación"], correct: "Parque Loefling", img: "loefling.jpg" }
+    const preguntas = [
+        { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: 1, img: "angel.jpg" },
+        { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: 2, img: "cachamay.jpg" },
+        { q: "¿Qué tepuy es famoso por ser llamado 'El Mundo Perdido'?", options: ["Monte Roraima", "Cerro Autana", "Auyantepui"], correct: 0, img: "roraima.jpg" },
+        { q: "¿Qué fortificaciones coloniales protegen la entrada por el río Orinoco?", options: ["Castillo de San Carlos", "Castillos de Guayana", "Fortín Solano"], correct: 1, img: "castillos.jpg" },
+        { q: "¿Cómo se llama la unión de los ríos Orinoco y Caroní?", options: ["El Abrazo de los Ríos", "Boca de Serpiente", "Confluencia Caroní-Orinoco"], correct: 2, img: "confluencia.jpg" },
+        { q: "¿Cuál es el pez emblemático que tiene su feria en Ciudad Bolívar?", options: ["Curbina", "Sapoara", "Bocachico"], correct: 1, img: "sapoara.jpg" },
+        { q: "¿Qué artista cinético tiene un museo en Ciudad Bolívar?", options: ["Carlos Cruz-Diez", "Alejandro Otero", "Jesús Soto"], correct: 2, img: "soto.jpg" },
+        { q: "¿Cómo se llama el puente que cruza el Orinoco en Ciudad Bolívar?", options: ["Puente Angostura", "Puente Orinoquia", "Puente Rafael Urdaneta"], correct: 0, img: "puente.jpg" },
+        { q: "¿En qué población se celebran los carnavales Patrimonio de la Humanidad?", options: ["Guasipati", "Tumeremo", "El Callao"], correct: 2, img: "callao.jpg" },
+        { q: "¿Cuál es el fruto seco típico con el que se hacen turrones?", options: ["Maní", "Merey", "Nuez de Barinas"], correct: 1, img: "merey.jpg" },
+        { q: "¿Qué lugar de la Gran Sabana tiene piso de piedra roja?", options: ["Quebrada del Jaspe", "Salto Aponguao", "Velo de la Novia"], correct: 0, img: "jaspe.jpg" },
+        { q: "¿Cómo se llama la central hidroeléctrica más grande de Venezuela?", options: ["Macagua", "Guri", "Caruachi"], correct: 1, img: "guri.jpg" },
+        { q: "¿Qué etnia indígena habita principalmente en Canaima?", options: ["Pemón", "Yanomami", "Warao"], correct: 0, img: "pemon.jpg" },
+        { q: "¿En qué casa histórica se redactó el Discurso de Angostura?", options: ["Casa de las Doce Ventanas", "Congreso de Angostura", "Casa San Isidro"], correct: 1, img: "congreso.jpg" },
+        { q: "¿Qué dulce tradicional se prepara con yuca y papelón?", options: ["Naiboa", "Majarete", "Jalea de Mango"], correct: 0, img: "naiboa.jpg" },
+        { q: "¿En qué parque se encuentra este salto?", options: ["Parque Cachamay", "Parque La Llovizna", "Parque Loefling"], correct: 1, img: "llovizna.jpg" },
+        { q: "¿Qué CC tiene forma de pirámide en Pto. Ordaz?", options: ["Orinokia Mall", "CC Altavista", "Babilonia"], correct: 0, img: "orinokia.jpg" },
+        { q: "¿Cuál es el museo interactivo junto a Central Macagua?", options: ["Museo Jesús Soto", "Ecomuseo del Caroní", "Museo de Guayana"], correct: 1, img: "ecomuseo.jpg" },
+        { q: "¿En qué sector de San Félix fue la batalla?", options: ["Dalla Costa", "El Roble", "Chirica"], correct: 2, img: "chirica.jpg" },
+        { q: "¿Qué parque de Pto. Ordaz es un zoológico de fauna regional?", options: ["Parque La Navidad", "Parque Loefling", "Parque La Fundación"], correct: 1, img: "loefling.jpg" }
     ];
 
-    let preguntas = [];
     let indice = 0, puntaje = 0, nombre = "";
-
-    function barajar(array) {
-        let n = [...array];
-        for (let i = n.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [n[i], n[j]] = [n[j], n[i]];
-        }
-        return n;
-    }
 
     function empezarJuego() {
         nombre = document.getElementById("nombre-usuario").value.trim();
         if (!nombre) return alert("¡Dinos tu nombre!");
-
-        preguntas = barajar([...bancoPreguntas]);
-        preguntas.forEach(p => p.options = barajar([...p.options]));
-
         document.getElementById("pantalla-inicio").classList.add("oculto");
         document.getElementById("juego").classList.remove("oculto");
         mostrarPregunta();
@@ -134,30 +195,20 @@
         const p = preguntas[indice];
         document.getElementById("num-pregunta").innerText = `PREGUNTA ${indice + 1} / ${preguntas.length}`;
         document.getElementById("enunciado").innerText = p.q;
-        document.getElementById("contenedor-foto").innerHTML = `<img src="${p.img}" class="img-trivia" onerror="this.src='https://placeholder.com'">`;
+        document.getElementById("contenedor-foto").innerHTML = `<img src="${p.img}" class="img-trivia" onerror="this.src='https://via.placeholder.com/400x220?text=Cargando...'">`;
         
         const lista = document.getElementById("opciones-lista");
         lista.innerHTML = "";
         lista.classList.remove("bloqueado");
 
-        p.options.forEach((opt) => {
+        p.options.forEach((opt, i) => {
             const b = document.createElement("button");
             b.innerText = opt; b.className = "opcion";
             b.onclick = () => {
                 lista.classList.add("bloqueado");
-                if(opt === p.correct) { 
-                    b.classList.add("correcto"); 
-                    puntaje += 100; 
-                } else { 
-                    b.classList.add("incorrecto");
-                    Array.from(lista.children).forEach(btn => {
-                        if(btn.innerText === p.correct) btn.classList.add("correcto");
-                    });
-                }
-                setTimeout(() => { 
-                    indice++; 
-                    (indice < preguntas.length) ? mostrarPregunta() : finalizar(); 
-                }, 800);
+                if(i === p.correct) { b.classList.add("correcto"); puntaje++; }
+                else { b.classList.add("incorrecto"); lista.children[p.correct].classList.add("correcto"); }
+                setTimeout(() => { indice++; (indice < preguntas.length) ? mostrarPregunta() : finalizar(); }, 800);
             };
             lista.appendChild(b);
         });
@@ -166,8 +217,9 @@
     function finalizar() {
         document.getElementById("juego").classList.add("oculto");
         document.getElementById("pantalla-final").classList.remove("oculto");
-        document.getElementById("resultado-final").innerText = puntaje + " Puntos";
-        database.ref('ranking').push({ nombre, pts: puntaje, fecha: Date.now() });
+        const total = puntaje * 100;
+        document.getElementById("resultado-final").innerText = total + " Puntos";
+        database.ref('ranking').push({ nombre, pts: total, fecha: Date.now() });
         cargarRanking();
     }
 
