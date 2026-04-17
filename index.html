@@ -12,7 +12,7 @@
     <style>
         :root { --primario: #005f73; --acento: #f1b92c; --fondo: #c3262f; --exito: #2ecc71; --error: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; }
-        .cintillo { width: 100%; max-width: 450px; margin-bottom: 15px; text-align: center; }
+        .cintillo { width: 100%; max-width: 500px; margin-bottom: 15px; text-align: center; }
         .cintillo img { max-width: 90%; height: auto; border-radius: 8px; }
         #quiz-container { background: white; padding: 1.2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 450px; width: 100%; text-align: center; box-sizing: border-box; }
         .contenedor-imagen { width: 100%; height: 180px; background: #eee; border-radius: 12px; margin-bottom: 12px; overflow: hidden; border: 3px solid var(--primario); display: flex; align-items: center; justify-content: center; }
@@ -44,7 +44,7 @@
         </div>
         <p>Ingresa tu nombre para comenzar:</p>
         <input type="text" id="nombre-usuario" placeholder="Nombre y Apellido">
-        <button class="btn-accion" id="btn-comenzar">¡Comenzar!</button>
+        <button class="btn-accion" onclick="empezarJuego()">¡Comenzar!</button>
     </div>
 
     <div id="juego" class="oculto">
@@ -73,22 +73,15 @@
     const firebaseConfig = {
         apiKey: "AIzaSyCyRgck7A2wAoWEd8WrkI1HUOv4rjubSWo",
         authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
         projectId: "trivia-bolivar",
         storageBucket: "trivia-bolivar.firebasestorage.app",
         messagingSenderId: "1046239380884",
         appId: "1:1046239380884:web:596a91edb4f22358957b81"
     };
 
-    
-    let database;
-    try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        database = firebase.database();
-    } catch (e) {
-        console.error("Firebase no cargó:", e);
-    }
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     const bancoPreguntas = [
         { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: "Salto Ángel", img: "angel.jpg" },
@@ -113,10 +106,8 @@
         { q: "¿Qué parque de Pto. Ordaz es un zoológico de fauna regional?", options: ["Parque La Navidad", "Parque Loefling", "Parque La Fundación"], correct: "Parque Loefling", img: "loefling.jpg" }
     ];
 
-    let preguntasMezcladas = [];
-    let indiceActual = 0;
-    let puntajeTotal = 0;
-    let nombreUsuarioGlobal = "";
+    let preguntas = [];
+    let indice = 0, puntaje = 0, nombre = "";
 
     function barajar(array) {
         let n = [...array];
@@ -127,25 +118,21 @@
         return n;
     }
 
-    // Usamos addEventListener para mayor seguridad
-    document.getElementById("btn-comenzar").addEventListener("click", function() {
-        nombreUsuarioGlobal = document.getElementById("nombre-usuario").value.trim();
-        if (!nombreUsuarioGlobal) {
-            alert("¡Dinos tu nombre!");
-            return;
-        }
+    function empezarJuego() {
+        nombre = document.getElementById("nombre-usuario").value.trim();
+        if (!nombre) return alert("¡Dinos tu nombre!");
 
-        preguntasMezcladas = barajar([...bancoPreguntas]);
-        preguntasMezcladas.forEach(p => p.options = barajar([...p.options]));
+        preguntas = barajar([...bancoPreguntas]);
+        preguntas.forEach(p => p.options = barajar([...p.options]));
 
         document.getElementById("pantalla-inicio").classList.add("oculto");
         document.getElementById("juego").classList.remove("oculto");
         mostrarPregunta();
-    });
+    }
 
     function mostrarPregunta() {
-        const p = preguntasMezcladas[indiceActual];
-        document.getElementById("num-pregunta").innerText = `PREGUNTA ${indiceActual + 1} / ${preguntasMezcladas.length}`;
+        const p = preguntas[indice];
+        document.getElementById("num-pregunta").innerText = `PREGUNTA ${indice + 1} / ${preguntas.length}`;
         document.getElementById("enunciado").innerText = p.q;
         document.getElementById("contenedor-foto").innerHTML = `<img src="${p.img}" class="img-trivia" onerror="this.src='https://placeholder.com'">`;
         
@@ -156,22 +143,21 @@
         p.options.forEach((opt) => {
             const b = document.createElement("button");
             b.innerText = opt; b.className = "opcion";
-            b.onclick = function() {
+            b.onclick = () => {
                 lista.classList.add("bloqueado");
-                if(opt === p.correct) {
-                    this.classList.add("correcto");
-                    puntajeTotal += 100;
-                } else {
-                    this.classList.add("incorrecto");
+                if(opt === p.correct) { 
+                    b.classList.add("correcto"); 
+                    puntaje += 100; 
+                } else { 
+                    b.classList.add("incorrecto");
                     Array.from(lista.children).forEach(btn => {
                         if(btn.innerText === p.correct) btn.classList.add("correcto");
                     });
                 }
-                setTimeout(() => {
-                    indiceActual++;
-                    if (indiceActual < preguntasMezcladas.length) mostrarPregunta();
-                    else finalizar();
-                }, 1000);
+                setTimeout(() => { 
+                    indice++; 
+                    (indice < preguntas.length) ? mostrarPregunta() : finalizar(); 
+                }, 800);
             };
             lista.appendChild(b);
         });
@@ -180,19 +166,15 @@
     function finalizar() {
         document.getElementById("juego").classList.add("oculto");
         document.getElementById("pantalla-final").classList.remove("oculto");
-        document.getElementById("resultado-final").innerText = puntajeTotal + " Puntos";
-        
-        if (database) {
-            database.ref('ranking').push({ nombre: nombreUsuarioGlobal, pts: puntajeTotal, fecha: Date.now() });
-            cargarRanking();
-        }
+        document.getElementById("resultado-final").innerText = puntaje + " Puntos";
+        database.ref('ranking').push({ nombre, pts: puntaje, fecha: Date.now() });
+        cargarRanking();
     }
 
     function cargarRanking() {
-        if (!database) return;
-        database.ref('ranking').orderByChild('pts').limitToLast(10).on('value', s => {
+        database.ref('ranking').orderByChild('pts').limitToLast(50).on('value', s => {
             let arr = []; s.forEach(child => { arr.push(child.val()); });
-            arr.sort((a,b) => b.pts - a.pts);
+            arr.sort((a,b) => b.pts - a.pts || a.fecha - b.fecha);
             document.getElementById("lista-ranking").innerHTML = arr.map((r, i) => 
                 `<tr><td>${i+1}</td><td>${r.nombre}</td><td>${r.pts}</td></tr>`).join("");
         });
