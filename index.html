@@ -44,7 +44,7 @@
         </div>
         <p>Ingresa tu nombre para comenzar:</p>
         <input type="text" id="nombre-usuario" placeholder="Nombre y Apellido">
-        <button class="btn-accion" onclick="empezarJuego()">¡Comenzar!</button>
+        <button class="btn-accion" id="btn-comenzar-juego">¡Comenzar!</button>
     </div>
 
     <div id="juego" class="oculto">
@@ -81,7 +81,7 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const db = firebase.database();
 
     const bancoPreguntas = [
         { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: "Salto Ángel", img: "angel.jpg" },
@@ -107,7 +107,9 @@
     ];
 
     let preguntas = [];
-    let indice = 0, puntaje = 0, nombre = "";
+    let indice = 0;
+    let puntajeTotal = 0;
+    let nombreDelJugador = "";
 
     function barajar(array) {
         let n = [...array];
@@ -118,9 +120,15 @@
         return n;
     }
 
-    function empezarJuego() {
-        nombre = document.getElementById("nombre-usuario").value.trim();
-        if (!nombre) return alert("¡Dinos tu nombre!");
+    
+    document.getElementById("btn-comenzar-juego").addEventListener("click", function() {
+        const inputNombre = document.getElementById("nombre-usuario");
+        nombreDelJugador = inputNombre.value.trim();
+        
+        if (!nombreDelJugador) {
+            alert("¡Dinos tu nombre!");
+            return;
+        }
 
         preguntas = barajar([...bancoPreguntas]);
         preguntas.forEach(p => p.options = barajar([...p.options]));
@@ -128,7 +136,7 @@
         document.getElementById("pantalla-inicio").classList.add("oculto");
         document.getElementById("juego").classList.remove("oculto");
         mostrarPregunta();
-    }
+    });
 
     function mostrarPregunta() {
         const p = preguntas[indice];
@@ -147,7 +155,7 @@
                 lista.classList.add("bloqueado");
                 if(opt === p.correct) { 
                     b.classList.add("correcto"); 
-                    puntaje += 100; 
+                    puntajeTotal += 100; 
                 } else { 
                     b.classList.add("incorrecto");
                     Array.from(lista.children).forEach(btn => {
@@ -156,7 +164,8 @@
                 }
                 setTimeout(() => { 
                     indice++; 
-                    (indice < preguntas.length) ? mostrarPregunta() : finalizar(); 
+                    if (indice < preguntas.length) mostrarPregunta(); 
+                    else finalizar(); 
                 }, 800);
             };
             lista.appendChild(b);
@@ -166,15 +175,23 @@
     function finalizar() {
         document.getElementById("juego").classList.add("oculto");
         document.getElementById("pantalla-final").classList.remove("oculto");
-        document.getElementById("resultado-final").innerText = puntaje + " Puntos";
-        database.ref('ranking').push({ nombre, pts: puntaje, fecha: Date.now() });
+        document.getElementById("resultado-final").innerText = puntajeTotal + " Puntos";
+        
+        // Guardar datos
+        db.ref('ranking').push({ 
+            nombre: nombreDelJugador, 
+            pts: puntajeTotal, 
+            fecha: Date.now() 
+        });
+        
         cargarRanking();
     }
 
     function cargarRanking() {
-        database.ref('ranking').orderByChild('pts').limitToLast(50).on('value', s => {
-            let arr = []; s.forEach(child => { arr.push(child.val()); });
-            arr.sort((a,b) => b.pts - a.pts || a.fecha - b.fecha);
+        db.ref('ranking').orderByChild('pts').limitToLast(10).on('value', s => {
+            let arr = []; 
+            s.forEach(child => { arr.push(child.val()); });
+            arr.sort((a,b) => b.pts - a.pts);
             document.getElementById("lista-ranking").innerHTML = arr.map((r, i) => 
                 `<tr><td>${i+1}</td><td>${r.nombre}</td><td>${r.pts}</td></tr>`).join("");
         });
