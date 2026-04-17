@@ -44,7 +44,7 @@
         </div>
         <p>Ingresa tu nombre para comenzar:</p>
         <input type="text" id="nombre-usuario" placeholder="Nombre y Apellido">
-        <button class="btn-accion" id="btn-comenzar-juego">¡Comenzar!</button>
+        <button class="btn-accion" id="btn-comenzar">¡Comenzar!</button>
     </div>
 
     <div id="juego" class="oculto">
@@ -70,132 +70,122 @@
 
 <script>
     
-    const firebaseConfig = {
-        apiKey: "AIzaSyCyRgck7A2wAoWEd8WrkI1HUOv4rjubSWo",
-        authDomain: "://firebaseapp.com",
-        databaseURL: "https://firebaseio.com",
-        projectId: "trivia-bolivar",
-        storageBucket: "trivia-bolivar.firebasestorage.app",
-        messagingSenderId: "1046239380884",
-        appId: "1:1046239380884:web:596a91edb4f22358957b81"
+    window.onload = function() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyRgck7A2wAoWEd8WrkI1HUOv4rjubSWo",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebaseio.com",
+            projectId: "trivia-bolivar",
+            storageBucket: "trivia-bolivar.firebasestorage.app",
+            messagingSenderId: "1046239380884",
+            appId: "1:1046239380884:web:596a91edb4f22358957b81"
+        };
+
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const bancoPreguntas = [
+            { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: "Salto Ángel", img: "angel.jpg" },
+            { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: "Ciudad Guayana", img: "cachamay.jpg" },
+            { q: "¿Qué tepuy es famoso por ser llamado 'El Mundo Perdido'?", options: ["Monte Roraima", "Cerro Autana", "Auyantepui"], correct: "Monte Roraima", img: "roraima.jpg" },
+            { q: "¿Qué fortificaciones coloniales protegen la entrada por el río Orinoco?", options: ["Castillo de San Carlos", "Castillos de Guayana", "Fortín Solano"], correct: "Castillos de Guayana", img: "castillos.jpg" },
+            { q: "¿Cómo se llama la unión de los ríos Orinoco y Caroní?", options: ["El Abrazo de los Ríos", "Boca de Serpiente", "Confluencia Caroní-Orinoco"], correct: "Confluencia Caroní-Orinoco", img: "confluencia.jpg" },
+            { q: "¿Cuál es el pez emblemático que tiene su feria en Ciudad Bolívar?", options: ["Curbina", "Sapoara", "Bocachico"], correct: "Sapoara", img: "sapoara.jpg" },
+            { q: "¿Qué artista cinético tiene un museo en Ciudad Bolívar?", options: ["Carlos Cruz-Diez", "Alejandro Otero", "Jesús Soto"], correct: "Jesús Soto", img: "soto.jpg" },
+            { q: "¿Cómo se llama el puente que cruza el Orinoco en Ciudad Bolívar?", options: ["Puente Angostura", "Puente Orinoquia", "Puente Rafael Urdaneta"], correct: "Puente Angostura", img: "puente.jpg" },
+            { q: "¿En qué población se celebran los carnavales Patrimonio de la Humanidad?", options: ["Guasipati", "Tumeremo", "El Callao"], correct: "El Callao", img: "callao.jpg" },
+            { q: "¿Cuál es el fruto seco típico con el que se hacen turrones?", options: ["Maní", "Merey", "Nuez de Barinas"], correct: "Merey", img: "merey.jpg" },
+            { q: "¿Qué lugar de la Gran Sabana tiene piso de piedra roja?", options: ["Quebrada del Jaspe", "Salto Aponguao", "Velo de la Novia"], correct: "Quebrada del Jaspe", img: "jaspe.jpg" },
+            { q: "¿Cómo se llama la central hidroeléctrica más grande de Venezuela?", options: ["Macagua", "Guri", "Caruachi"], correct: "Guri", img: "guri.jpg" },
+            { q: "¿Qué etnia indígena habita principalmente en Canaima?", options: ["Pemón", "Yanomami", "Warao"], correct: "Pemón", img: "pemon.jpg" },
+            { q: "¿En qué casa histórica se redactó el Discurso de Angostura?", options: ["Casa de las Doce Ventanas", "Congreso de Angostura", "Casa San Isidro"], correct: "Congreso de Angostura", img: "congreso.jpg" },
+            { q: "¿Qué dulce tradicional se prepara con yuca y papelón?", options: ["Naiboa", "Majarete", "Jalea de Mango"], correct: "Naiboa", img: "naiboa.jpg" },
+            { q: "¿En qué parque se encuentra este salto?", options: ["Parque Cachamay", "Parque La Llovizna", "Parque Loefling"], correct: "Parque La Llovizna", img: "llovizna.jpg" },
+            { q: "¿Qué CC tiene forma de pirámide en Pto. Ordaz?", options: ["Orinokia Mall", "CC Altavista", "Babilonia"], correct: "Orinokia Mall", img: "orinokia.jpg" },
+            { q: "¿Cuál es el museo interactivo junto a Central Macagua?", options: ["Museo Jesús Soto", "Ecomuseo del Caroní", "Museo de Guayana"], correct: "Ecomuseo del Caroní", img: "ecomuseo.jpg" },
+            { q: "¿En qué sector de San Félix fue la batalla?", options: ["Dalla Costa", "El Roble", "Chirica"], correct: "Chirica", img: "chirica.jpg" },
+            { q: "¿Qué parque de Pto. Ordaz es un zoológico de fauna regional?", options: ["Parque La Navidad", "Parque Loefling", "Parque La Fundación"], correct: "Parque Loefling", img: "loefling.jpg" }
+        ];
+
+        let preguntasMezcladas = [];
+        let indiceActual = 0;
+        let puntajeFinal = 0;
+        let nombreGlobal = "";
+
+        function mezclar(arr) {
+            let n = [...arr];
+            for (let i = n.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [n[i], n[j]] = [n[j], n[i]];
+            }
+            return n;
+        }
+
+        
+        document.getElementById("btn-comenzar").onclick = function() {
+            nombreGlobal = document.getElementById("nombre-usuario").value.trim();
+            if (!nombreGlobal) return alert("¡Ingresa tu nombre!");
+
+            preguntasMezcladas = mezclar(bancoPreguntas);
+            preguntasMezcladas.forEach(p => p.options = mezclar(p.options));
+
+            document.getElementById("pantalla-inicio").classList.add("oculto");
+            document.getElementById("juego").classList.remove("oculto");
+            mostrarPregunta();
+        };
+
+        function mostrarPregunta() {
+            const p = preguntasMezcladas[indiceActual];
+            document.getElementById("num-pregunta").innerText = `PREGUNTA ${indiceActual + 1} / ${preguntasMezcladas.length}`;
+            document.getElementById("enunciado").innerText = p.q;
+            document.getElementById("contenedor-foto").innerHTML = `<img src="${p.img}" class="img-trivia" onerror="this.src='https://placeholder.com'">`;
+            
+            const lista = document.getElementById("opciones-lista");
+            lista.innerHTML = "";
+            lista.classList.remove("bloqueado");
+
+            p.options.forEach((opt) => {
+                const b = document.createElement("button");
+                b.innerText = opt; b.className = "opcion";
+                b.onclick = function() {
+                    lista.classList.add("bloqueado");
+                    if(opt === p.correct) {
+                        this.classList.add("correcto");
+                        puntajeFinal += 100;
+                    } else {
+                        this.classList.add("incorrecto");
+                        Array.from(lista.children).forEach(btn => {
+                            if(btn.innerText === p.correct) btn.classList.add("correcto");
+                        });
+                    }
+                    setTimeout(() => {
+                        indiceActual++;
+                        if (indiceActual < preguntasMezcladas.length) mostrarPregunta();
+                        else finalizar();
+                    }, 800);
+                };
+                lista.appendChild(b);
+            });
+        }
+
+        function finalizar() {
+            document.getElementById("juego").classList.add("oculto");
+            document.getElementById("pantalla-final").classList.remove("oculto");
+            document.getElementById("resultado-final").innerText = puntajeFinal + " Puntos";
+            database.ref('ranking').push({ nombre: nombreGlobal, pts: puntajeFinal, fecha: Date.now() });
+            cargarRanking();
+        }
+
+        function cargarRanking() {
+            database.ref('ranking').orderByChild('pts').limitToLast(10).on('value', s => {
+                let arr = []; s.forEach(child => { arr.push(child.val()); });
+                arr.sort((a,b) => b.pts - a.pts);
+                document.getElementById("lista-ranking").innerHTML = arr.map((r, i) => 
+                    `<tr><td>${i+1}</td><td>${r.nombre}</td><td>${r.pts}</td></tr>`).join("");
+            });
+        }
     };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const bancoPreguntas = [
-        { q: "¿Cuál es la caída de agua más alta del mundo ubicada en Canaima?", options: ["Salto Kukenán", "Salto Ángel", "Salto La Llovizna"], correct: "Salto Ángel", img: "angel.jpg" },
-        { q: "¿En qué ciudad se encuentra el imponente Parque Cachamay?", options: ["Ciudad Bolívar", "Upata", "Ciudad Guayana"], correct: "Ciudad Guayana", img: "cachamay.jpg" },
-        { q: "¿Qué tepuy es famoso por ser llamado 'El Mundo Perdido'?", options: ["Monte Roraima", "Cerro Autana", "Auyantepui"], correct: "Monte Roraima", img: "roraima.jpg" },
-        { q: "¿Qué fortificaciones coloniales protegen la entrada por el río Orinoco?", options: ["Castillo de San Carlos", "Castillos de Guayana", "Fortín Solano"], correct: "Castillos de Guayana", img: "castillos.jpg" },
-        { q: "¿Cómo se llama la unión de los ríos Orinoco y Caroní?", options: ["El Abrazo de los Ríos", "Boca de Serpiente", "Confluencia Caroní-Orinoco"], correct: "Confluencia Caroní-Orinoco", img: "confluencia.jpg" },
-        { q: "¿Cuál es el pez emblemático que tiene su feria en Ciudad Bolívar?", options: ["Curbina", "Sapoara", "Bocachico"], correct: "Sapoara", img: "sapoara.jpg" },
-        { q: "¿Qué artista cinético tiene un museo en Ciudad Bolívar?", options: ["Carlos Cruz-Diez", "Alejandro Otero", "Jesús Soto"], correct: "Jesús Soto", img: "soto.jpg" },
-        { q: "¿Cómo se llama el puente que cruza el Orinoco en Ciudad Bolívar?", options: ["Puente Angostura", "Puente Orinoquia", "Puente Rafael Urdaneta"], correct: "Puente Angostura", img: "puente.jpg" },
-        { q: "¿En qué población se celebran los carnavales Patrimonio de la Humanidad?", options: ["Guasipati", "Tumeremo", "El Callao"], correct: "El Callao", img: "callao.jpg" },
-        { q: "¿Cuál es el fruto seco típico con el que se hacen turrones?", options: ["Maní", "Merey", "Nuez de Barinas"], correct: "Merey", img: "merey.jpg" },
-        { q: "¿Qué lugar de la Gran Sabana tiene piso de piedra roja?", options: ["Quebrada del Jaspe", "Salto Aponguao", "Velo de la Novia"], correct: "Quebrada del Jaspe", img: "jaspe.jpg" },
-        { q: "¿Cómo se llama la central hidroeléctrica más grande de Venezuela?", options: ["Macagua", "Guri", "Caruachi"], correct: "Guri", img: "guri.jpg" },
-        { q: "¿Qué etnia indígena habita principalmente en Canaima?", options: ["Pemón", "Yanomami", "Warao"], correct: "Pemón", img: "pemon.jpg" },
-        { q: "¿En qué casa histórica se redactó el Discurso de Angostura?", options: ["Casa de las Doce Ventanas", "Congreso de Angostura", "Casa San Isidro"], correct: "Congreso de Angostura", img: "congreso.jpg" },
-        { q: "¿Qué dulce tradicional se prepara con yuca y papelón?", options: ["Naiboa", "Majarete", "Jalea de Mango"], correct: "Naiboa", img: "naiboa.jpg" },
-        { q: "¿En qué parque se encuentra este salto?", options: ["Parque Cachamay", "Parque La Llovizna", "Parque Loefling"], correct: "Parque La Llovizna", img: "llovizna.jpg" },
-        { q: "¿Qué CC tiene forma de pirámide en Pto. Ordaz?", options: ["Orinokia Mall", "CC Altavista", "Babilonia"], correct: "Orinokia Mall", img: "orinokia.jpg" },
-        { q: "¿Cuál es el museo interactivo junto a Central Macagua?", options: ["Museo Jesús Soto", "Ecomuseo del Caroní", "Museo de Guayana"], correct: "Ecomuseo del Caroní", img: "ecomuseo.jpg" },
-        { q: "¿En qué sector de San Félix fue la batalla?", options: ["Dalla Costa", "El Roble", "Chirica"], correct: "Chirica", img: "chirica.jpg" },
-        { q: "¿Qué parque de Pto. Ordaz es un zoológico de fauna regional?", options: ["Parque La Navidad", "Parque Loefling", "Parque La Fundación"], correct: "Parque Loefling", img: "loefling.jpg" }
-    ];
-
-    let preguntas = [];
-    let indice = 0;
-    let puntajeTotal = 0;
-    let nombreDelJugador = "";
-
-    function barajar(array) {
-        let n = [...array];
-        for (let i = n.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [n[i], n[j]] = [n[j], n[i]];
-        }
-        return n;
-    }
-
-    
-    document.getElementById("btn-comenzar-juego").addEventListener("click", function() {
-        const inputNombre = document.getElementById("nombre-usuario");
-        nombreDelJugador = inputNombre.value.trim();
-        
-        if (!nombreDelJugador) {
-            alert("¡Dinos tu nombre!");
-            return;
-        }
-
-        preguntas = barajar([...bancoPreguntas]);
-        preguntas.forEach(p => p.options = barajar([...p.options]));
-
-        document.getElementById("pantalla-inicio").classList.add("oculto");
-        document.getElementById("juego").classList.remove("oculto");
-        mostrarPregunta();
-    });
-
-    function mostrarPregunta() {
-        const p = preguntas[indice];
-        document.getElementById("num-pregunta").innerText = `PREGUNTA ${indice + 1} / ${preguntas.length}`;
-        document.getElementById("enunciado").innerText = p.q;
-        document.getElementById("contenedor-foto").innerHTML = `<img src="${p.img}" class="img-trivia" onerror="this.src='https://placeholder.com'">`;
-        
-        const lista = document.getElementById("opciones-lista");
-        lista.innerHTML = "";
-        lista.classList.remove("bloqueado");
-
-        p.options.forEach((opt) => {
-            const b = document.createElement("button");
-            b.innerText = opt; b.className = "opcion";
-            b.onclick = () => {
-                lista.classList.add("bloqueado");
-                if(opt === p.correct) { 
-                    b.classList.add("correcto"); 
-                    puntajeTotal += 100; 
-                } else { 
-                    b.classList.add("incorrecto");
-                    Array.from(lista.children).forEach(btn => {
-                        if(btn.innerText === p.correct) btn.classList.add("correcto");
-                    });
-                }
-                setTimeout(() => { 
-                    indice++; 
-                    if (indice < preguntas.length) mostrarPregunta(); 
-                    else finalizar(); 
-                }, 800);
-            };
-            lista.appendChild(b);
-        });
-    }
-
-    function finalizar() {
-        document.getElementById("juego").classList.add("oculto");
-        document.getElementById("pantalla-final").classList.remove("oculto");
-        document.getElementById("resultado-final").innerText = puntajeTotal + " Puntos";
-        
-        // Guardar datos
-        db.ref('ranking').push({ 
-            nombre: nombreDelJugador, 
-            pts: puntajeTotal, 
-            fecha: Date.now() 
-        });
-        
-        cargarRanking();
-    }
-
-    function cargarRanking() {
-        db.ref('ranking').orderByChild('pts').limitToLast(10).on('value', s => {
-            let arr = []; 
-            s.forEach(child => { arr.push(child.val()); });
-            arr.sort((a,b) => b.pts - a.pts);
-            document.getElementById("lista-ranking").innerHTML = arr.map((r, i) => 
-                `<tr><td>${i+1}</td><td>${r.nombre}</td><td>${r.pts}</td></tr>`).join("");
-        });
-    }
 </script>
 </body>
 </html>
